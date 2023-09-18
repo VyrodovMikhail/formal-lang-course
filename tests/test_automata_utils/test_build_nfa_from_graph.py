@@ -88,20 +88,16 @@ def test_build_nfa_from_graph_exceptions():
     second_nodes_count = 10
     edge_labels = ("a", "b")
     name = "labeled_graph.dot"
-    graph_utils.create_labeled_two_cycles_graph(
+    real_graph = graph_utils.create_labeled_two_cycles_graph(
         first_nodes_count, second_nodes_count, edge_labels, name
     )
 
-    real_graph = nx.nx_pydot.read_dot("labeled_graph.dot")
-    if real_graph.has_node("\\n"):
-        real_graph.remove_node("\\n")
-
-    start_states = {"1", "2", "3", "4", "20"}
-    end_states = {"5", "6", "7"}
+    start_states = {1, 2, 3, 4, 20}
+    end_states = {5, 6, 7}
     with pytest.raises(Exception, match="Wrong start states"):
         nfa = automata_utils.build_nfa_from_graph(real_graph, start_states, end_states)
 
-    start_states = {"1", "2", "3", "4"}
-    end_states = {"5", "6", "7", "25"}
+    start_states = {1, 2, 3, 4}
+    end_states = {5, 6, 7, 25}
     with pytest.raises(Exception, match="Wrong final states"):
         nfa = automata_utils.build_nfa_from_graph(real_graph, start_states, end_states)
