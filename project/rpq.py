@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import networkx as nx
 import random
 
@@ -8,7 +10,7 @@ from project.automata_intersection import intersect_automata
 
 
 def get_transitive_closure(intersection_matricies: dict[lil_matrix]) -> lil_matrix:
-    states_count, _ = random.choice(list(intersection_matricies.values())).shape
+    states_count, _ = next(iter(intersection_matricies.values())).shape
     reach_matrix = lil_array((states_count, states_count), dtype=bool)
 
     reach_matrix = sum(intersection_matricies.values(), start=reach_matrix)
@@ -34,6 +36,7 @@ def rpq(
     (intersection_matrices, start_states, final_states) = intersect_automata(
         nfa_from_graph, dfa_from_regex
     )
+
     transitive_closure = get_transitive_closure(intersection_matrices)
 
     result_paths = set()
