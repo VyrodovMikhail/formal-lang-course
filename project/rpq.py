@@ -1,7 +1,4 @@
-from typing import Tuple
-
 import networkx as nx
-import random
 
 from scipy.sparse import lil_array, lil_matrix
 
