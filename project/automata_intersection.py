@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from pyformlang.finite_automaton import FiniteAutomaton, NondeterministicFiniteAutomaton
+from pyformlang.finite_automaton import FiniteAutomaton
 from scipy.sparse import lil_array, lil_matrix, kron
 
 from project.graph_utils import get_graph_properties
@@ -35,7 +35,7 @@ def get_boolean_decomposition(automaton: FiniteAutomaton) -> dict[lil_matrix]:
 
 def intersect_automata(
     first: FiniteAutomaton, second: FiniteAutomaton
-) -> Tuple[FiniteAutomaton, dict[lil_matrix]]:
+) -> Tuple[dict[lil_matrix], list[int], list[int]]:
     first_boolean_decomposition = get_boolean_decomposition(first)
     second_boolean_decomposition = get_boolean_decomposition(second)
 
@@ -43,19 +43,13 @@ def intersect_automata(
         set(second_boolean_decomposition.keys())
     )
     intersection_matrices = dict()
+    start_states = list()
+    final_states = list()
 
-    result_automaton = NondeterministicFiniteAutomaton()
     for label in intersection_labels:
         intersection_matrices[label] = kron(
             first_boolean_decomposition[label], second_boolean_decomposition[label]
         )
-
-    for label, intersection_matrix in intersection_matrices.items():
-        edges_indices = intersection_matrix.nonzero()
-        rows_indexes, columns_indexes = edges_indices
-        labels = [label] * len(rows_indexes)
-        tuples_list = list(zip(rows_indexes, labels, columns_indexes))
-        result_automaton.add_transitions(tuples_list)
 
     first_states = list(first.states)
     second_states = list(second.states)
@@ -78,10 +72,10 @@ def intersect_automata(
 
     for i in first_start_indices:
         for j in second_start_indices:
-            result_automaton.add_start_state(i * len(second_states) + j)
+            start_states.append(i * len(second_states) + j)
 
     for i in first_final_indices:
         for j in second_final_indices:
-            result_automaton.add_final_state(i * len(second_states) + j)
+            final_states.append(i * len(second_states) + j)
 
-    return result_automaton, intersection_matrices
+    return intersection_matrices, start_states, final_states

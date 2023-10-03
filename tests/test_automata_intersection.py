@@ -50,5 +50,15 @@ def test_intersect_automata():
 
     expected.add_start_state(0)
     expected.add_final_state(3)
-    intersection_automaton, _ = intersect_automata(first, second)
-    assert expected == intersection_automaton
+    (intersection_matrices, start_states, final_states) = intersect_automata(
+        first, second
+    )
+    expected_dict = expected.to_dict()
+    for expected_left_state in expected_dict.keys():
+        for label in expected_dict[expected_left_state]:
+            for expected_right_state in expected_dict[expected_left_state][label]:
+                assert intersection_matrices[label].tocsr()[
+                    expected_left_state.value, expected_right_state.value
+                ]
+    assert set(expected.start_states) == set(start_states)
+    assert set(expected.final_states) == set(final_states)

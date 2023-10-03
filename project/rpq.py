@@ -31,14 +31,12 @@ def rpq(
 ):
     nfa_from_graph = build_nfa_from_graph(graph, start_vertices, final_vertices)
     dfa_from_regex = build_minimal_dfa_from_regex(regex_str)
-    (intersection_automaton, intersection_matrices) = intersect_automata(
+    (intersection_matrices, start_states, final_states) = intersect_automata(
         nfa_from_graph, dfa_from_regex
     )
     transitive_closure = get_transitive_closure(intersection_matrices)
 
     result_paths = set()
-    start_states = intersection_automaton.start_states
-    final_states = intersection_automaton.final_states
     regex_dfa_states_number = len(list(dfa_from_regex.states))
     graph_nfa_states = list(nfa_from_graph.states)
     edges_indices = transitive_closure.nonzero()
