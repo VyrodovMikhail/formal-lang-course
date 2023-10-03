@@ -1,5 +1,7 @@
+from typing import Tuple
+
 from pyformlang.finite_automaton import FiniteAutomaton, NondeterministicFiniteAutomaton
-from scipy.sparse import find, lil_array, lil_matrix, kron
+from scipy.sparse import lil_array, lil_matrix, kron
 
 from project.graph_utils import get_graph_properties
 
@@ -31,7 +33,9 @@ def get_boolean_decomposition(automaton: FiniteAutomaton) -> dict[lil_matrix]:
     return boolean_decomposition
 
 
-def intersect_automata(first: FiniteAutomaton, second: FiniteAutomaton):
+def intersect_automata(
+    first: FiniteAutomaton, second: FiniteAutomaton
+) -> Tuple[FiniteAutomaton, dict[lil_matrix]]:
     first_boolean_decomposition = get_boolean_decomposition(first)
     second_boolean_decomposition = get_boolean_decomposition(second)
 
@@ -47,12 +51,11 @@ def intersect_automata(first: FiniteAutomaton, second: FiniteAutomaton):
         )
 
     for label, intersection_matrix in intersection_matrices.items():
-        edges = find(intersection_matrix)
-        rows_indexes, columns_indexes, real_labels = edges
-        for (first_in_edge, second_in_edge, _) in zip(
-            rows_indexes, columns_indexes, real_labels
-        ):
-            result_automaton.add_transition(first_in_edge, label, second_in_edge)
+        edges_indices = intersection_matrix.nonzero()
+        rows_indexes, columns_indexes = edges_indices
+        labels = [label] * len(rows_indexes)
+        tuples_list = list(zip(rows_indexes, labels, columns_indexes))
+        result_automaton.add_transitions(tuples_list)
 
     first_states = list(first.states)
     second_states = list(second.states)
@@ -81,4 +84,4 @@ def intersect_automata(first: FiniteAutomaton, second: FiniteAutomaton):
         for j in second_final_indices:
             result_automaton.add_final_state(i * len(second_states) + j)
 
-    return result_automaton
+    return result_automaton, intersection_matrices

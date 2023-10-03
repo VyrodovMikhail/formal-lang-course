@@ -1,6 +1,6 @@
 from pyformlang.finite_automaton import NondeterministicFiniteAutomaton
 
-from project.rpq_utils import rpq
+from project.rpq import rpq
 
 
 def test_rpq():

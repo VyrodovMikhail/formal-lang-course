@@ -50,5 +50,5 @@ def test_intersect_automata():
 
     expected.add_start_state(0)
     expected.add_final_state(3)
-
-    assert expected == intersect_automata(first, second)
+    intersection_automaton, _ = intersect_automata(first, second)
+    assert expected == intersection_automaton
