@@ -2,8 +2,11 @@ import networkx as nx
 
 from pyformlang.finite_automaton import DeterministicFiniteAutomaton
 
-from project.automata_utils import get_boolean_decomposition
-from project.bfs_utils import construct_direct_sums_matrices, bfs_rpq
+from project.automata_operations.automaton_boolean_decomposition import (
+    get_boolean_decomposition,
+)
+from project.rpq.bfs_rpq import construct_direct_sums_matrices, bfs_rpq
+from project.rpq.bfs_rpq_mode import BfsRpqMode
 
 
 def test_construct_direct_sums_matrices():
@@ -58,10 +61,14 @@ def test_bfs_rpq():
     graph.add_nodes_from(nodes)
     graph.add_edges_from(edges)
 
-    result_vertices = bfs_rpq(graph, regex, {nodes[0]}, {nodes[2]}, False)
+    result_vertices = bfs_rpq(
+        graph, regex, {nodes[0]}, {nodes[2]}, BfsRpqMode.RPQ_FOR_VERTICES_SET
+    )
     assert result_vertices == {nodes[2]}
 
-    result_vertices = bfs_rpq(graph, regex, {nodes[0]}, {nodes[2]}, True)
+    result_vertices = bfs_rpq(
+        graph, regex, {nodes[0]}, {nodes[2]}, BfsRpqMode.RPQ_FOR_EVERY_VERTEX
+    )
     assert result_vertices == {(nodes[0], nodes[2])}
 
 
@@ -80,9 +87,15 @@ def test_bfs_rpq_for_every_vertice():
     graph.add_edges_from(edges)
 
     result_vertices = bfs_rpq(
-        graph, regex, {nodes[0], nodes[1]}, {nodes[2], nodes[3]}, True
+        graph,
+        regex,
+        {nodes[0], nodes[1]},
+        {nodes[2], nodes[3]},
+        BfsRpqMode.RPQ_FOR_EVERY_VERTEX,
     )
     assert result_vertices == {(nodes[0], nodes[2]), (nodes[1], nodes[2])}
 
-    result_vertices = bfs_rpq(graph, regex, {nodes[0]}, {nodes[2]}, True)
+    result_vertices = bfs_rpq(
+        graph, regex, {nodes[0]}, {nodes[2]}, BfsRpqMode.RPQ_FOR_EVERY_VERTEX
+    )
     assert result_vertices == {(nodes[0], nodes[2])}

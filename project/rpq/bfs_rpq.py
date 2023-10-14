@@ -1,27 +1,18 @@
 import networkx as nx
 
 from pyformlang.finite_automaton import FiniteAutomaton
-from scipy.sparse import lil_matrix, block_diag, vstack
+from scipy.sparse import lil_matrix, vstack
 
-from project.automata_utils import build_nfa_from_graph, build_minimal_dfa_from_regex
-from project.automata_utils import make_state_indices_dict
-from project.automata_utils import get_boolean_decomposition
-
-
-def construct_direct_sums_matrices(
-    regex_decomposition: dict[lil_matrix], graph_decomposition: dict[lil_matrix]
-):
-    labels_intersection = set(regex_decomposition.keys()).intersection(
-        set(graph_decomposition.keys())
-    )
-
-    direct_sums = dict()
-    for label in labels_intersection:
-        direct_sums[label] = block_diag(
-            (regex_decomposition[label], graph_decomposition[label]), format="csr"
-        )
-
-    return direct_sums
+from project.matrix_operations import construct_direct_sums_matrices
+from project.automata_operations.automaton_construction import (
+    build_nfa_from_graph,
+    build_minimal_dfa_from_regex,
+)
+from project.automata_operations.automaton_boolean_decomposition import (
+    make_state_indices_dict,
+    get_boolean_decomposition,
+)
+from project.rpq.bfs_rpq_mode import BfsRpqMode
 
 
 def create_front_matrix(
@@ -66,7 +57,7 @@ def extract_answer_from_front(
     graph_automaton: FiniteAutomaton,
     graph_states_dict,
     front_matrix: lil_matrix,
-    rpq_for_every_vertex: bool,
+    rpq_for_every_vertex: BfsRpqMode,
 ):
     regex_states_count = len(regex.states)
     regex_final_state_indices = [
@@ -86,7 +77,7 @@ def extract_answer_from_front(
             and column - regex_states_count in graph_final_state_indices
         ):
             vertex_index = column - regex_states_count
-            if rpq_for_every_vertex:
+            if rpq_for_every_vertex == BfsRpqMode.RPQ_FOR_EVERY_VERTEX:
                 start_index = graph_start_state_indices[row // len(regex.states)]
                 result.add((start_index, vertex_index))
             else:
@@ -96,7 +87,9 @@ def extract_answer_from_front(
 
 
 def bfs_rpq_automata(
-    regex: FiniteAutomaton, graph_automaton: FiniteAutomaton, rpq_for_every_vertex: bool
+    regex: FiniteAutomaton,
+    graph_automaton: FiniteAutomaton,
+    rpq_for_every_vertex: BfsRpqMode,
 ):
     regex_states_dict = make_state_indices_dict(regex.states)
     graph_states_dict = make_state_indices_dict(graph_automaton.states)
@@ -104,7 +97,7 @@ def bfs_rpq_automata(
         graph_states_dict[state] for state in graph_automaton.start_states
     ]
 
-    if rpq_for_every_vertex:
+    if rpq_for_every_vertex == BfsRpqMode.RPQ_FOR_EVERY_VERTEX:
         fronts = [
             create_front_matrix(regex, graph_automaton, {start_state})
             for start_state in graph_start_states_indices
@@ -151,9 +144,9 @@ def bfs_rpq(
     regex_str: str,
     start_vertices: set = None,
     final_vertices: set = None,
-    rpq_for_every_vertex: bool = True,
+    rpq_mode: BfsRpqMode = BfsRpqMode.RPQ_FOR_VERTICES_SET,
 ):
     nfa_from_graph = build_nfa_from_graph(graph, start_vertices, final_vertices)
     dfa_from_regex = build_minimal_dfa_from_regex(regex_str)
 
-    return bfs_rpq_automata(dfa_from_regex, nfa_from_graph, rpq_for_every_vertex)
+    return bfs_rpq_automata(dfa_from_regex, nfa_from_graph, rpq_mode)

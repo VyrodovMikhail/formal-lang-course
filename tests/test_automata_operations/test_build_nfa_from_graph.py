@@ -1,11 +1,13 @@
 import networkx as nx
 import pytest
 
-from project import graph_utils, automata_utils
 from pyformlang.finite_automaton import NondeterministicFiniteAutomaton
 
+from project import graph_utils
+from project.automata_operations.automaton_construction import build_nfa_from_graph
 
-def build_nfa_from_graph(graph: nx.MultiDiGraph, start: set[int], end: set[int]):
+
+def build_real_nfa_from_graph(graph: nx.MultiDiGraph, start: set[int], end: set[int]):
     nfa = NondeterministicFiniteAutomaton()
     for edge in graph.edges(data=True):
         first, second, edge_data = edge
@@ -49,8 +51,8 @@ def test_build_nfa_from_labeled_two_cycles_graph():
 
     start_states = {1, 2, 3, 4}
     end_states = {5, 6, 7}
-    expected_nfa = build_nfa_from_graph(real_graph, start_states, end_states)
-    nfa = automata_utils.build_nfa_from_graph(real_graph, start_states, end_states)
+    expected_nfa = build_real_nfa_from_graph(real_graph, start_states, end_states)
+    nfa = build_nfa_from_graph(real_graph, start_states, end_states)
     assert nfa.is_equivalent_to(expected_nfa)
     assert_nfa_info_equals_graph_info(nfa, real_graph, start_states, end_states)
 
@@ -60,8 +62,8 @@ def test_build_nfa_from_graph_from_name():
 
     start_states = {1, 2, 3, 4}
     end_states = {5, 6, 7}
-    expected_nfa = build_nfa_from_graph(real_graph, start_states, end_states)
-    nfa = automata_utils.build_nfa_from_graph(real_graph, start_states, end_states)
+    expected_nfa = build_real_nfa_from_graph(real_graph, start_states, end_states)
+    nfa = build_nfa_from_graph(real_graph, start_states, end_states)
     assert nfa.is_equivalent_to(expected_nfa)
     assert_nfa_info_equals_graph_info(nfa, real_graph, start_states, end_states)
 
@@ -77,8 +79,8 @@ def test_build_nfa_without_start_or_final_vertices():
 
     start_states = set(real_graph.nodes)
     end_states = set(real_graph.nodes)
-    expected_nfa = build_nfa_from_graph(real_graph, start_states, end_states)
-    nfa = automata_utils.build_nfa_from_graph(real_graph)
+    expected_nfa = build_real_nfa_from_graph(real_graph, start_states, end_states)
+    nfa = build_nfa_from_graph(real_graph)
     assert nfa.is_equivalent_to(expected_nfa)
     assert_nfa_info_equals_graph_info(nfa, real_graph, start_states, end_states)
 
@@ -95,9 +97,9 @@ def test_build_nfa_from_graph_exceptions():
     start_states = {1, 2, 3, 4, 20}
     end_states = {5, 6, 7}
     with pytest.raises(Exception, match="Wrong start states"):
-        nfa = automata_utils.build_nfa_from_graph(real_graph, start_states, end_states)
+        nfa = build_nfa_from_graph(real_graph, start_states, end_states)
 
     start_states = {1, 2, 3, 4}
     end_states = {5, 6, 7, 25}
     with pytest.raises(Exception, match="Wrong final states"):
-        nfa = automata_utils.build_nfa_from_graph(real_graph, start_states, end_states)
+        nfa = build_nfa_from_graph(real_graph, start_states, end_states)

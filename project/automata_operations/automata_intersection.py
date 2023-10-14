@@ -3,7 +3,9 @@ from typing import Tuple
 from pyformlang.finite_automaton import FiniteAutomaton
 from scipy.sparse import lil_matrix, kron
 
-from project.automata_utils import get_boolean_decomposition
+from project.automata_operations.automaton_boolean_decomposition import (
+    get_boolean_decomposition,
+)
 
 
 def intersect_automata(

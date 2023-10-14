@@ -1,10 +1,13 @@
 from pyformlang.finite_automaton import NondeterministicFiniteAutomaton
-from project import automata_utils
+
+from project.automata_operations.automaton_construction import (
+    build_minimal_dfa_from_regex,
+)
 
 
 def test_build_minimal_dfa_from_regex():
     regex_str = "(a+b+c)*+(a b)"
-    min_dfa = automata_utils.build_minimal_dfa_from_regex(regex_str)
+    min_dfa = build_minimal_dfa_from_regex(regex_str)
     expected = NondeterministicFiniteAutomaton()
     expected.add_start_state(0)
     expected.add_final_state(2)

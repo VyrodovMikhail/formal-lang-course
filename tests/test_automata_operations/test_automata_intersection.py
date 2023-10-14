@@ -3,7 +3,10 @@ from pyformlang.finite_automaton import (
     NondeterministicFiniteAutomaton,
 )
 
-from project.automata_intersection import get_boolean_decomposition, intersect_automata
+from project.automata_operations.automata_intersection import intersect_automata
+from project.automata_operations.automaton_boolean_decomposition import (
+    get_boolean_decomposition,
+)
 
 
 def test_get_boolean_decomposition():
