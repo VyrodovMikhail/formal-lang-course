@@ -1,25 +1,11 @@
 import networkx as nx
 
-from scipy.sparse import lil_array, lil_matrix
-
-from project.automata_utils import build_nfa_from_graph, build_minimal_dfa_from_regex
-from project.automata_intersection import intersect_automata
-
-
-def get_transitive_closure(intersection_matricies: dict[lil_matrix]) -> lil_matrix:
-    states_count, _ = next(iter(intersection_matricies.values())).shape
-    reach_matrix = lil_array((states_count, states_count), dtype=bool)
-
-    reach_matrix = sum(intersection_matricies.values(), start=reach_matrix)
-
-    prev_nonzero_count = -1
-    curr_nonzero_count = reach_matrix.count_nonzero()
-    while prev_nonzero_count != curr_nonzero_count:
-        reach_matrix += reach_matrix @ reach_matrix
-        prev_nonzero_count = curr_nonzero_count
-        curr_nonzero_count = reach_matrix.count_nonzero()
-
-    return reach_matrix
+from project.automata_operations.automaton_construction import (
+    build_nfa_from_graph,
+    build_minimal_dfa_from_regex,
+)
+from project.automata_operations.automata_intersection import intersect_automata
+from project.matrix_operations import get_transitive_closure
 
 
 def rpq(

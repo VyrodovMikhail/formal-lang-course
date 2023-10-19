@@ -1,9 +1,10 @@
+import networkx as nx
+
 from pyformlang.regular_expression import Regex
 from pyformlang.finite_automaton import (
     DeterministicFiniteAutomaton,
     NondeterministicFiniteAutomaton,
 )
-import networkx as nx
 
 
 def build_minimal_dfa_from_regex(regex_str: str) -> DeterministicFiniteAutomaton:
