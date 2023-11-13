@@ -1,14 +1,22 @@
+from typing import Union
+from pathlib import Path
+
 import networkx as nx
-
-
 from pyformlang.cfg import CFG, Terminal, Variable, Epsilon
-from project.context_free_grammars.cfg_operations import convert_cfg_to_wcnf, is_in_wcnf
+
+from project.context_free_grammars.cfg_operations import (
+    convert_cfg_to_wcnf,
+    is_in_wcnf,
+    read_grammar_from_file,
+)
+from project.graph_utils import read_from_dot
 
 
 def get_start_set(grammar: CFG, graph: nx.MultiDiGraph):
     start_set = set()
     graph_nodes = list(graph.nodes)
     for production in grammar.productions:
+
         if production.body == [Epsilon()]:
             for node in graph_nodes:
                 start_set.add((production.head, node, node))
@@ -34,24 +42,26 @@ def construct_production_dict(grammar: CFG):
     return production_dict
 
 
-"""def construct_vertices_dicts(start_set):
-    first_v_dict = dict()
-    second_v_dict = dict()
-    for (nonterminal, first, second) in start_set:
-        if first not in first_v_dict:
-            first_v_dict[first] = [nonterminal, second]
-        else:
-            first_v_dict[first].append([nonterminal, second])
+def start_hellings(
+    grammar: Union[Path, CFG],
+    start_symbol: str,
+    graph: Union[str, nx.MultiDiGraph],
+    start=None,
+    end=None,
+    nonterminal=None,
+):
+    if isinstance(grammar, Path):
+        grammar = read_grammar_from_file(grammar, start_symbol)
 
-        if second not in second_v_dict:
-            second_v_dict[second] = [nonterminal, first]
-        else:
-            second_v_dict[second].append([nonterminal, first])
+    if isinstance(graph, str):
+        graph = read_from_dot(graph)
 
-    return first_v_dict, second_v_dict """
+    return hellings(grammar, graph, start, end, nonterminal)
 
 
-def hellings(grammar: CFG, graph: nx.MultiDiGraph):
+def hellings(
+    grammar: CFG, graph: nx.MultiDiGraph, start=None, end=None, nonterminal=None
+):
     if not is_in_wcnf(grammar):
         grammar = convert_cfg_to_wcnf(grammar)
 
@@ -86,5 +96,29 @@ def hellings(grammar: CFG, graph: nx.MultiDiGraph):
                     if new_path not in result_set:
                         processing_set.add(new_path)
                         result_set.add(new_path)
+
+    if end is not None or start is not None or nonterminal is not None:
+        filtered_result_set = set()
+        for (nonterminall, first, second) in result_set:
+            if first in start:
+                filtered_result_set.add((nonterminall, first, second))
+
+        if end is None and nonterminal is None:
+            return filtered_result_set
+
+        new_filtered_set = set()
+        for (nonterminall, first, second) in filtered_result_set:
+            if second in end:
+                new_filtered_set.add((nonterminall, first, second))
+
+        if nonterminal is None:
+            return new_filtered_set
+
+        final_filtered_set = set()
+        for (nonterminall, first, second) in new_filtered_set:
+            if nonterminall == nonterminal:
+                final_filtered_set.add((nonterminall, first, second))
+
+        return final_filtered_set
 
     return result_set

@@ -1,7 +1,9 @@
+from pathlib import Path
+
 import networkx as nx
 
 from pyformlang.cfg import CFG, Terminal, Variable, Production
-from project.cfpq.hellings import hellings
+from project.cfpq.hellings import hellings, start_hellings
 
 
 def test_hellings():
@@ -58,4 +60,70 @@ def test_hellings():
     }
 
     result = hellings(grammar, graph)
+    assert result == expected_result
+
+    expected_result = {
+        (var_A, 1, 2),
+        (var_S, 1, 2),
+        (var_S, 0, 2),
+        (var_S1, 0, 2),
+        (var_S, 1, 3),
+        (var_S1, 1, 2),
+        (var_A, 0, 1),
+        (var_S, 0, 3),
+        (var_S1, 0, 3),
+        (var_S1, 1, 3),
+    }
+
+    result_with_start_set = hellings(grammar, graph, {0, 1})
+    assert result_with_start_set == expected_result
+
+    expected_result = {
+        (var_A, 1, 2),
+        (var_S, 1, 2),
+        (var_S, 0, 2),
+        (var_S1, 0, 2),
+        (var_S1, 1, 2),
+    }
+
+    result_with_end_set = hellings(grammar, graph, {0, 1}, {2})
+    assert result_with_end_set == expected_result
+
+    expected_result = {
+        (var_S1, 0, 2),
+        (var_S1, 1, 2),
+    }
+
+    result_with_nonterminal = hellings(grammar, graph, {0, 1}, {2}, var_S1)
+    assert result_with_nonterminal == expected_result
+
+
+def test_hellings_from_files():
+    var_S = Variable("S")
+    var_S1 = Variable("S1")
+    var_A = Variable("A")
+    var_B = Variable("B")
+
+    expected_result = {
+        (var_A, "2", "0"),
+        (var_A, "1", "2"),
+        (var_S, "1", "2"),
+        (var_S1, "2", "3"),
+        (var_B, "3", "2"),
+        (var_S, "0", "2"),
+        (var_S1, "0", "2"),
+        (var_S, "1", "3"),
+        (var_S1, "1", "2"),
+        (var_S, "2", "2"),
+        (var_A, "0", "1"),
+        (var_B, "2", "3"),
+        (var_S, "2", "3"),
+        (var_S1, "2", "2"),
+        (var_S, "0", "3"),
+        (var_S1, "0", "3"),
+        (var_S1, "1", "3"),
+    }
+    path = Path("tests/test_cfpq/grammar.txt")
+
+    result = start_hellings(path, "S", "tests/test_cfpq/graph.dot")
     assert result == expected_result
