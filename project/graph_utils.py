@@ -35,3 +35,11 @@ def create_labeled_two_cycles_graph(
     nx.nx_pydot.write_dot(new_graph, name)
     print(f"Two cycles graph was written to {name} file.")
     return new_graph
+
+
+def read_from_dot(path: str):
+    graph = nx.drawing.nx_pydot.read_dot(path)
+    if "\\n" in graph:
+        graph.remove_node("\\n")
+
+    return graph
