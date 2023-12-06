@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Union
 
-from pyformlang.cfg import CFG, Terminal, Variable
+from pyformlang.cfg import CFG, Variable
 from pyformlang.regular_expression import Regex
 
 
@@ -13,7 +13,7 @@ class ECFG:
         terminals: set[str],
         nonterminals: set[str],
         start_symbol: str,
-        productions: Dict[str, Regex],
+        productions: Dict[Variable, Regex],
     ):
         self.terminals = terminals
         self.nonterminals = nonterminals
@@ -51,7 +51,7 @@ class ECFG:
 
             nonterminal = tokens[0]
             regex = Regex(" ".join(tokens[2:]))
-            productions[nonterminal] = regex
+            productions[Variable(nonterminal)] = regex
 
         terminals -= nonterminals
 
@@ -72,15 +72,14 @@ class ECFG:
         str_terminals = {terminal.value for terminal in cfg.terminals}
         str_variables = {variable.value for variable in cfg.variables}
         ecfg = cls(str_terminals, str_variables, cfg.start_symbol.value, dict())
-        ecfg_productions = dict()
 
         for production in cfg.productions:
             str_body = [elem.value for elem in production.body]
             regex = Regex(" ".join(str_body))
-            if production.head not in ecfg_productions:
-                ecfg_productions[production.head.value] = regex
+            if production.head not in ecfg.productions:
+                ecfg.productions[production.head] = regex
             else:
-                ecfg_productions[production.head.value] = ecfg_productions[
+                ecfg.productions[production.head] = ecfg.productions[
                     production.head.value
                 ].union(regex)
 

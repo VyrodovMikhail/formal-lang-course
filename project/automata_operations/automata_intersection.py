@@ -1,30 +1,25 @@
-from typing import Tuple
-
-from pyformlang.finite_automaton import FiniteAutomaton
+from pyformlang.finite_automaton import FiniteAutomaton, State
 from scipy.sparse import lil_matrix, kron
 
 from project.automata_operations.automaton_boolean_decomposition import (
     get_boolean_decomposition,
 )
+from project.matrix_operations import (
+    intersect_boolean_decompositions,
+)
 
 
 def intersect_automata(
     first: FiniteAutomaton, second: FiniteAutomaton
-) -> Tuple[dict[lil_matrix], list[int], list[int]]:
+) -> tuple[dict[lil_matrix], list[int], list[int]]:
     first_boolean_decomposition = get_boolean_decomposition(first)
     second_boolean_decomposition = get_boolean_decomposition(second)
 
-    intersection_labels = set(first_boolean_decomposition.keys()).intersection(
-        set(second_boolean_decomposition.keys())
+    intersection_matrices = intersect_boolean_decompositions(
+        first_boolean_decomposition, second_boolean_decomposition
     )
-    intersection_matrices = dict()
     start_states = list()
     final_states = list()
-
-    for label in intersection_labels:
-        intersection_matrices[label] = kron(
-            first_boolean_decomposition[label], second_boolean_decomposition[label]
-        )
 
     first_states = list(first.states)
     second_states = list(second.states)

@@ -1,4 +1,4 @@
-from scipy.sparse import lil_matrix, block_diag, lil_array
+from scipy.sparse import lil_matrix, block_diag, lil_array, kron
 
 
 def construct_direct_sums_matrices(
@@ -15,6 +15,18 @@ def construct_direct_sums_matrices(
         )
 
     return direct_sums
+
+
+def intersect_boolean_decompositions(
+    first: dict[any, lil_matrix], second: dict[any, lil_matrix]
+) -> dict[any, lil_matrix]:
+    intersection_labels = set(first.keys()).intersection(set(second.keys()))
+
+    intersection_matrices = dict()
+    for label in intersection_labels:
+        intersection_matrices[label] = kron(first[label], second[label])
+
+    return intersection_matrices
 
 
 def get_transitive_closure(intersection_matricies: dict[lil_matrix]) -> lil_matrix:
