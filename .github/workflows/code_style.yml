@@ -51,6 +51,11 @@ jobs:
         run: |
           pre-commit install
 
+      - name: Generate parser code
+        working-directory: project/parser
+        run: |
+          antlr4 language.g4 -Dlanguage=Python3
+
       # Run pre-commit on all the files in the repo
       - name: Run pre-commit
         run: |

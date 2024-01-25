@@ -51,8 +51,6 @@ expr ->
     '(' expr ')'
   | VAR
   | val
-  | map
-  | filter
   | intersect
   | concat
   | union
@@ -68,6 +66,8 @@ set -> var
   | 'get_vertices' '(' graph ')'
   | 'get_edges' '(' graph ')'
   | 'get_labels' '(' graph ')'
+  | 'map' '(' 'fun' VAR '->' expr ')'
+  | 'filter' '(' 'fun' VAR '->' expr ')'
   | '(' set ')'
 
 val -> STRING
@@ -75,6 +75,7 @@ val -> STRING
   | BOOL
   | graph
   | regex
+  | set
 
 regex -> 'r' STRING
 
@@ -87,12 +88,10 @@ graph -> var
   | 'load_from_file' STRING
   | 'load_from_name' STRING
 
-map -> 'map' '(' 'fun' VAR '->' expr ')'
-filter -> 'filter' '(' 'fun' VAR '->' expr ')'
 intersect -> 'intersect' '(' expr ',' expr ')'
 concat -> 'concat' '(' expr ',' expr ')'
 union -> 'union' '(' expr ',' expr ')'
-star -> 'star' '(' expr ',' expr ')'
+star -> '(' expr ')' '*'
 contains -> expr 'in' set
 
 BOOL --> 'true' | 'false'
